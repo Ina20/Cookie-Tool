@@ -20,7 +20,7 @@ article {
   background: #fff;
   padding: 20px;
   margin: 10px;
-  width: 50%;
+  width: 80%;
   box-shadow: 4px 3px 7px 1px rgba(0, 0, 0, 0.2);
 }
 footer {
@@ -101,10 +101,16 @@ button:hover {
   form {
     grid-template-columns: repeat(2, 1fr);
   }
+  article {
+    width: 60%;
+  }
 }
 
 @media screen and (min-width: 1600px) {
   form {
     grid-template-columns: repeat(3, 1fr);
+  }
+  article {
+    width: 50%;
   }
 }

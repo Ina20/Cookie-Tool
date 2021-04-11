@@ -1,15 +1,22 @@
 let vendors = [];
 let modal;
+let userDecision;
 
 window.onload = function myFunction() {
-  document.getElementById('button').addEventListener("click", openModal);
-  //openModal();
-  getVendors();
+  if(document.cookie == ''){
+    getVendors();
+  }
+}
 
+async function getVendors() {
+  let res = await fetch('https://optad360.mgr.consensu.org/cmp/v2/vendor-list.json');
+  let data = await res.json();
+  vendors = data.vendors;
+  openModal();
 }
 
 const openModal = () => {
-  document.body.style.overflow = "hidden";
+  document.body.style.overflow = 'hidden';
 
   modal = document.createElement('div');
   const modalContent = document.createElement('div');
@@ -24,14 +31,14 @@ const openModal = () => {
   modal.classList.add('modal');
   modalContent.classList.add('modal-content');
 
-  buttonAccept.addEventListener("click", acceptVendors);
-  buttonReject.addEventListener("click", rejectVendors);
+  buttonAccept.addEventListener('click', acceptVendors);
+  buttonReject.addEventListener('click', rejectVendors);
 
-  modal.style.display = "block";
+  modal.style.display = 'block';
 
-  title.innerHTML = "GDPR consent";
-  buttonAccept.innerHTML = "Accept";
-  buttonReject.innerHTML = "Reject";
+  title.innerHTML = 'GDPR consent';
+  buttonAccept.innerHTML = 'Accept';
+  buttonReject.innerHTML = 'Reject';
 
   buttonWrapper.classList.add('button-wrapper');
   buttonWrapper.appendChild(buttonAccept);
@@ -60,7 +67,7 @@ const createVendorsList = (form) => {
     vendorUrl.setAttribute('href', vendors[vendor].policyUrl);
     vendorUrl.innerText = 'Cookie Policy';
 
-    vendorLabel.setAttribute("for", vendors[vendor].id);
+    vendorLabel.setAttribute('for', vendors[vendor].id);
     vendorLabel.innerHTML = vendors[vendor].name + " ";
     vendorLabel.appendChild(vendorUrl);
 
@@ -74,36 +81,33 @@ const createVendorsList = (form) => {
 }
 
 const acceptVendors = () => {
-  console.log('accept');
+  modal.style.display = 'none';
+  document.body.style.overflow = 'auto';
 
+  userDecision = 'accept';
 
   let checkboxes = document.getElementsByName('vendor');
   let checkboxesChecked = [];
-  console.log(checkboxes);
-
   for (let i = 0; i < checkboxes.length; i++) {
     if(checkboxes[i].checked){
-      console.log('checked ' + checkboxes[i].value);
       checkboxesChecked.push(checkboxes[i].value);
     }
   }
-
-  console.log(checkboxesChecked);
-
-  modal.style.display = "none";
-  document.body.style.overflow = "auto";
+  createCookie(userDecision, checkboxesChecked);
 }
 
 const rejectVendors = () => {
-  console.log('reject');
+  modal.style.display = 'none';
+  document.body.style.overflow = 'auto';
 
-  modal.style.display = "none";
-  document.body.style.overflow = "auto";
+  userDecision = 'reject';
+
+  createCookie(userDecision, []);
 }
 
-async function getVendors() {
-  let res = await fetch('https://optad360.mgr.consensu.org/cmp/v2/vendor-list.json');
-  let data = await res.json();
-  vendors = data.vendors;
-  console.log(vendors);
+const createCookie = (userDecision, vendors) => {
+  let expires = (new Date(Date.now()+ 86400*1000)).toUTCString();
+  let cookieString = {userDecision: userDecision, vendors: vendors};
+
+  document.cookie = 'GDPRconsent=' + JSON.stringify(cookieString)  + '; expires=' + expires;
 }
