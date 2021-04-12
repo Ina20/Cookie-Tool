@@ -96,6 +96,14 @@ button:hover {
   background: #c5856d;
   cursor: pointer;
 }
+.checkAll-wrapper {
+  margin-bottom: 15px;
+  display: flex;
+  align-self: flex-start;
+}
+.checkAll-wrapper label {
+  padding-left: 10px;
+}
 
 @media screen and (min-width: 1100px) {
   form {

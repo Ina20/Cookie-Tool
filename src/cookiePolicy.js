@@ -3,7 +3,28 @@ let modal;
 let userDecision;
 
 window.onload = function myFunction() {
-  if(document.cookie == ''){
+  checkCookie();
+}
+
+const getCookie = (cname) => {
+  let name = cname + '=';
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for(let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return '';
+}
+
+const checkCookie = () => {
+  let consent = getCookie('GDPRconsent');
+  if (consent == '') {
     getVendors();
   }
 }
@@ -25,8 +46,22 @@ const openModal = () => {
   const buttonReject = document.createElement('button');
   const buttonWrapper = document.createElement('div');
   const form = document.createElement('form');
+  const checkAll = document.createElement('input');
+  const checkAllLabel = document.createElement('label');
+  const checkAllWrapper = document.createElement('div');
 
   createVendorsList(form);
+
+  checkAll.setAttribute('type', 'checkbox');
+  checkAll.setAttribute('id', 'checkAllVendors');
+  checkAll.addEventListener('click', checkAllVendors);
+
+  checkAllLabel.setAttribute('for', 'checkAllVendors');
+  checkAllLabel.innerHTML = 'Check All';
+
+  checkAllWrapper.classList.add('checkAll-wrapper');
+  checkAllWrapper.appendChild(checkAll);
+  checkAllWrapper.appendChild(checkAllLabel);
 
   modal.classList.add('modal');
   modalContent.classList.add('modal-content');
@@ -45,6 +80,7 @@ const openModal = () => {
   buttonWrapper.appendChild(buttonReject);
 
   modalContent.appendChild(title);
+  modalContent.appendChild(checkAllWrapper);
   modalContent.appendChild(form);
   modalContent.appendChild(buttonWrapper);
   modal.appendChild(modalContent);
@@ -68,7 +104,7 @@ const createVendorsList = (form) => {
     vendorUrl.innerText = 'Cookie Policy';
 
     vendorLabel.setAttribute('for', vendors[vendor].id);
-    vendorLabel.innerHTML = vendors[vendor].name + " ";
+    vendorLabel.innerHTML = vendors[vendor].name + ' ';
     vendorLabel.appendChild(vendorUrl);
 
     vendorWrapper.classList.add('vendor-wrapper');
@@ -78,6 +114,18 @@ const createVendorsList = (form) => {
 
     form.appendChild(vendorWrapper);
   })
+}
+
+const checkAllVendors = () => {
+  let checkboxes = document.getElementsByName('vendor');
+
+  for (let i = 0; i < checkboxes.length; i++) {
+    if(document.getElementById('checkAllVendors').checked) {
+      checkboxes[i].checked = true;
+    }else {
+      checkboxes[i].checked = false;
+    }
+  }
 }
 
 const acceptVendors = () => {
@@ -93,6 +141,7 @@ const acceptVendors = () => {
       checkboxesChecked.push(checkboxes[i].value);
     }
   }
+
   createCookie(userDecision, checkboxesChecked);
 }
 
@@ -107,7 +156,7 @@ const rejectVendors = () => {
 
 const createCookie = (userDecision, vendors) => {
   let expires = (new Date(Date.now()+ 86400*1000)).toUTCString();
-  let cookieString = {userDecision: userDecision, vendors: vendors};
+  let cookieContent = {userDecision: userDecision, vendors: vendors};
 
-  document.cookie = 'GDPRconsent=' + JSON.stringify(cookieString)  + '; expires=' + expires;
+  document.cookie = 'GDPRconsent=' + JSON.stringify(cookieContent)  + '; expires=' + expires;
 }
